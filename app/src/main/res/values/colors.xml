@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- dlms losss color palette — mas ari -->
+<resources>
+    <!-- Backgrounds -->
+    <color name="bg_dark">#0D0D0D</color>
+    <color name="surface_dark">#1A1A1A</color>
+    <color name="surface_light">#2E2E2E</color>
+
+    <!-- Accent -->
+    <color name="accent_gold">#F0B429</color>
+    <color name="accent_blue">#4EA8DE</color>
+    <color name="accent_green">#3ECF8E</color>
+    <color name="accent_red">#E53E3E</color>
+
+    <!-- Text -->
+    <color name="text_primary">#E0E0E0</color>
+    <color name="text_secondary">#9E9E9E</color>
+    <color name="text_dim">#616161</color>
+</resources>

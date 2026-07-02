@@ -1,0 +1,80 @@
+name: Android CI — dlms losss (mas ari)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    name: Build Release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout ─────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Java 17 ──────────────────────────────────────────────────────────
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      # ── 3. Android SDK + NDK ─────────────────────────────────────────────────
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install NDK and CMake
+        run: |
+          sdkmanager --install \
+            "ndk;26.3.11579264" \
+            "cmake;3.22.1" \
+            "platforms;android-34" \
+            "build-tools;34.0.0"
+          echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/26.3.11579264" >> $GITHUB_ENV
+
+      # ── 4. Gradle cache ──────────────────────────────────────────────────────
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      # ── 5. Grant execute permission for gradlew ───────────────────────────────
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      # ── 6. Build debug APK (no keystore needed) ──────────────────────────────
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --no-daemon
+
+      # ── 7. Upload APK artifact ────────────────────────────────────────────────
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: dlms-losss-debug-${{ github.run_number }}
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+
+      # ── (Optional) Release build — uncomment and add keystore secrets ─────────
+      # - name: Build Release APK
+      #   env:
+      #     KEYSTORE_FILE:    ${{ secrets.KEYSTORE_FILE }}      # base64-encoded .jks
+      #     KEY_ALIAS:        ${{ secrets.KEY_ALIAS }}
+      #     KEY_PASSWORD:     ${{ secrets.KEY_PASSWORD }}
+      #     STORE_PASSWORD:   ${{ secrets.STORE_PASSWORD }}
+      #   run: |
+      #     echo "$KEYSTORE_FILE" | base64 --decode > keystore.jks
+      #     ./gradlew assembleRelease \
+      #       -Pandroid.injected.signing.store.file=$(pwd)/keystore.jks \
+      #       -Pandroid.injected.signing.store.password=$STORE_PASSWORD \
+      #       -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
+      #       -Pandroid.injected.signing.key.password=$KEY_PASSWORD \
+      #       --no-daemon

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">dlms losss</string>
+    <string name="owner_credit">Owner: mas ari</string>
+    <string name="app_description">Digital Loudspeaker Management System</string>
+
+    <!-- Channel names -->
+    <string name="ch_low_l">LOW  L</string>
+    <string name="ch_low_r">LOW  R</string>
+    <string name="ch_mid_l">MID  L</string>
+    <string name="ch_mid_r">MID  R</string>
+    <string name="ch_high_l">HIGH L</string>
+    <string name="ch_high_r">HIGH R</string>
+
+    <!-- Buttons -->
+    <string name="btn_start">▶ Start Engine</string>
+    <string name="btn_stop">■ Stop Engine</string>
+    <string name="btn_import_dwp">Import .dwp Preset</string>
+
+    <!-- About -->
+    <string name="about_text">dlms losss v1.0\nDeveloped by mas ari\nReal-time DSP powered by Google Oboe</string>
+</resources>

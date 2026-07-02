@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    view_channel_strip.xml — Single output channel strip
+    Included 6× in activity_main.xml (Low L/R, Mid L/R, High L/R)
+    dlms losss — mas ari
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/surface_dark"
+    android:padding="10dp">
+
+    <!-- Channel label (set programmatically via tag or binding) -->
+    <TextView
+        android:id="@+id/tvChannelLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CH"
+        android:textColor="@color/accent_gold"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.08" />
+
+    <!-- Mute & Phase row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="6dp">
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchMute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="M"
+            android:textColor="@color/accent_red"
+            android:textSize="11sp"
+            app:thumbTint="@color/accent_red"
+            app:trackTint="@color/surface_light" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchPhase"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ø"
+            android:textColor="@color/text_primary"
+            android:textSize="11sp"
+            android:layout_marginStart="8dp"
+            app:thumbTint="@color/accent_blue"
+            app:trackTint="@color/surface_light" />
+    </LinearLayout>
+
+    <!-- Gain slider -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Gain (dB)"
+        android:textColor="@color/text_secondary"
+        android:textSize="10sp"
+        android:layout_marginTop="6dp" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/sliderGain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:valueFrom="-20"
+        android:valueTo="20"
+        android:value="0"
+        android:stepSize="0.5"
+        app:thumbColor="@color/accent_gold"
+        app:trackColorActive="@color/accent_gold"
+        app:trackColorInactive="@color/surface_light"
+        app:labelBehavior="floating" />
+
+    <!-- Delay slider -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delay (ms)"
+        android:textColor="@color/text_secondary"
+        android:textSize="10sp"
+        android:layout_marginTop="4dp" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/sliderDelay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:valueFrom="0"
+        android:valueTo="20"
+        android:value="0"
+        android:stepSize="0.1"
+        app:thumbColor="@color/accent_blue"
+        app:trackColorActive="@color/accent_blue"
+        app:trackColorInactive="@color/surface_light"
+        app:labelBehavior="floating" />
+
+</LinearLayout>

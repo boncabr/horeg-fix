@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    activity_main.xml — Dark-themed professional audio layout
+    dlms losss — mas ari
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- ═══ BRANDING HEADER ═══════════════════════════════════════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/surface_dark"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:id="@+id/tvAppTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="dlms losss"
+                android:textColor="@color/accent_gold"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05" />
+
+            <TextView
+                android:id="@+id/tvOwner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Owner: mas ari  |  Digital Loudspeaker Management System"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:layout_marginTop="2dp" />
+
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ready"
+                android:textColor="@color/accent_green"
+                android:textSize="13sp"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+
+        <!-- ═══ ENGINE CONTROL ══════════════════════════════════════════════ -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnToggleEngine"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="▶ Start Engine"
+            android:textSize="16sp"
+            android:textColor="@color/bg_dark"
+            app:backgroundTint="@color/accent_gold"
+            android:layout_marginBottom="12dp" />
+
+        <!-- ═══ TUNING MENU: .dwp Import ═══════════════════════════════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/surface_dark"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TUNING MENU"
+                android:textColor="@color/accent_blue"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnImportDwp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Import .dwp Preset"
+                    app:backgroundTint="@color/accent_blue"
+                    android:textColor="@android:color/white" />
+
+                <TextView
+                    android:id="@+id/tvPresetName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="No preset loaded"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:layout_marginStart="12dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ═══ CROSSOVER ═══════════════════════════════════════════════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/surface_dark"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CROSSOVER  (Linkwitz-Riley 24 dB/oct)"
+                android:textColor="@color/accent_blue"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1" />
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Low / Mid (Hz)" android:textColor="@color/text_primary"
+                android:textSize="12sp" android:layout_marginTop="8dp" />
+            <com.google.android.material.slider.Slider
+                android:id="@+id/sliderLowMid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:valueFrom="50" android:valueTo="1000"
+                android:value="200"
+                android:stepSize="10"
+                app:thumbColor="@color/accent_gold"
+                app:trackColorActive="@color/accent_gold"
+                app:trackColorInactive="@color/surface_light" />
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Mid / High (Hz)" android:textColor="@color/text_primary"
+                android:textSize="12sp" android:layout_marginTop="4dp" />
+            <com.google.android.material.slider.Slider
+                android:id="@+id/sliderMidHigh"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:valueFrom="500" android:valueTo="10000"
+                android:value="2000"
+                android:stepSize="100"
+                app:thumbColor="@color/accent_gold"
+                app:trackColorActive="@color/accent_gold"
+                app:trackColorInactive="@color/surface_light" />
+        </LinearLayout>
+
+        <!-- ═══ CHANNEL STRIPS ══════════════════════════════════════════════ -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OUTPUT CHANNELS"
+            android:textColor="@color/accent_blue"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Row 1: Low L/R -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <include android:id="@+id/channelLowL"
+                layout="@layout/view_channel_strip"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp" />
+
+            <include android:id="@+id/channelLowR"
+                layout="@layout/view_channel_strip"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp" />
+        </LinearLayout>
+
+        <!-- Row 2: Mid L/R -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <include android:id="@+id/channelMidL"
+                layout="@layout/view_channel_strip"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp" />
+
+            <include android:id="@+id/channelMidR"
+                layout="@layout/view_channel_strip"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp" />
+        </LinearLayout>
+
+        <!-- Row 3: High L/R -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <include android:id="@+id/channelHighL"
+                layout="@layout/view_channel_strip"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp" />
+
+            <include android:id="@+id/channelHighR"
+                layout="@layout/view_channel_strip"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp" />
+        </LinearLayout>
+
+        <!-- Footer credit -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="dlms losss v1.0  |  © mas ari"
+            android:textColor="@color/text_dim"
+            android:textSize="10sp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp" />
+
+    </LinearLayout>
+</ScrollView>

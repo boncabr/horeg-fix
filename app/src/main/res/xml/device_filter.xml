@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    USB device filter — allows app to receive USB_DEVICE_ATTACHED for any
+    USB audio class device. Vendor/product ID left open (any value) so all
+    USB audio interfaces are matched.
+    dlms losss — mas ari
+-->
+<resources>
+    <!-- USB Audio Class device (bDeviceClass=0, bDeviceSubClass=0, interface class=1) -->
+    <usb-device class="0" subclass="0" />
+</resources>
