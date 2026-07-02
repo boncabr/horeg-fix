@@ -24,22 +24,23 @@ AudioEngine::~AudioEngine() { stop(); }
 // ── Open INPUT stream (non-callback, blocking read) ───────────────────────────
 bool AudioEngine::openInputStream() {
     oboe::AudioStreamBuilder builder;
-    builder.setDirection(oboe::Direction::Input)
-           .setPerformanceMode(oboe::PerformanceMode::LowLatency)
-           .setSharingMode(oboe::SharingMode::Exclusive)
-           .setFormat(oboe::AudioFormat::Float)
-           .setChannelCount(kInputChannels)   // stereo
-           .setSampleRate(48000)
-           // NO callback — we poll with read() from the output callback thread
-           .setCallback(nullptr);
+    // Oboe fluent setters return AudioStreamBuilder* — use -> for chaining
+    oboe::Result result = builder
+        .setDirection(oboe::Direction::Input)
+        ->setPerformanceMode(oboe::PerformanceMode::LowLatency)
+        ->setSharingMode(oboe::SharingMode::Exclusive)
+        ->setFormat(oboe::AudioFormat::Float)
+        ->setChannelCount(kInputChannels)
+        ->setSampleRate(48000)
+        ->setCallback(nullptr)   // non-callback: we poll with read() from output thread
+        ->openStream(inputStream_);
 
-    oboe::Result result = builder.openStream(inputStream_);
     if (result != oboe::Result::OK) {
-        LOGW("Input stream open failed (%s) — running output-only",
+        LOGW("Input stream open failed (%s) — output-only mode",
              oboe::convertToText(result));
-        return false; // non-fatal: DSP runs on silence
+        return false;
     }
-    LOGI("Input stream opened: sr=%d ch=%d",
+    LOGI("Input stream: sr=%d ch=%d",
          inputStream_->getSampleRate(), inputStream_->getChannelCount());
     return true;
 }
@@ -47,20 +48,30 @@ bool AudioEngine::openInputStream() {
 // ── Open OUTPUT stream (callback driven, 6-ch) ────────────────────────────────
 bool AudioEngine::openOutputStream() {
     oboe::AudioStreamBuilder builder;
-    builder.setDirection(oboe::Direction::Output)
-           .setPerformanceMode(oboe::PerformanceMode::LowLatency)
-           .setSharingMode(oboe::SharingMode::Exclusive)
-           .setFormat(oboe::AudioFormat::Float)
-           .setChannelCount(kNumOutputChannels)
-           .setSampleRate(48000)
-           .setCallback(this);
+    oboe::Result result = builder
+        .setDirection(oboe::Direction::Output)
+        ->setPerformanceMode(oboe::PerformanceMode::LowLatency)
+        ->setSharingMode(oboe::SharingMode::Exclusive)
+        ->setFormat(oboe::AudioFormat::Float)
+        ->setChannelCount(kNumOutputChannels)
+        ->setSampleRate(48000)
+        ->setCallback(this)
+        ->openStream(outputStream_);
 
-    oboe::Result result = builder.openStream(outputStream_);
     if (result != oboe::Result::OK) {
         LOGW("Exclusive 6-ch output failed (%s) — retrying Shared",
              oboe::convertToText(result));
-        builder.setSharingMode(oboe::SharingMode::Shared);
-        result = builder.openStream(outputStream_);
+        oboe::AudioStreamBuilder builder2;
+        result = builder2
+            .setDirection(oboe::Direction::Output)
+            ->setPerformanceMode(oboe::PerformanceMode::LowLatency)
+            ->setSharingMode(oboe::SharingMode::Shared)
+            ->setFormat(oboe::AudioFormat::Float)
+            ->setChannelCount(kNumOutputChannels)
+            ->setSampleRate(48000)
+            ->setCallback(this)
+            ->openStream(outputStream_);
+
         if (result != oboe::Result::OK) {
             LOGE("Output stream open failed: %s", oboe::convertToText(result));
             return false;
@@ -69,25 +80,21 @@ bool AudioEngine::openOutputStream() {
 
     const float sr = static_cast<float>(outputStream_->getSampleRate());
     dspEngine_->prepare(sr);
-    LOGI("Output stream opened: sr=%.0f ch=%d", sr, outputStream_->getChannelCount());
+    LOGI("Output stream: sr=%.0f ch=%d", sr, outputStream_->getChannelCount());
     return true;
 }
 
 bool AudioEngine::start() {
     if (running_.load()) return true;
-
-    // Output stream is required; input is optional (graceful silent fallback)
     if (!openOutputStream()) { stop(); return false; }
-    openInputStream(); // failure tolerated
+    openInputStream(); // failure tolerated — runs on silence
 
-    if (inputStream_) inputStream_->requestStart();
+    if (inputStream_)  inputStream_->requestStart();
     auto outResult = outputStream_->requestStart();
     if (outResult != oboe::Result::OK) {
         LOGE("Output start failed: %s", oboe::convertToText(outResult));
-        stop();
-        return false;
+        stop(); return false;
     }
-
     running_.store(true);
     LOGI("AudioEngine started");
     return true;
@@ -105,29 +112,22 @@ oboe::DataCallbackResult AudioEngine::onAudioReady(oboe::AudioStream* /*stream*/
                                                     void* audioData,
                                                     int32_t numFrames)
 {
-    // Safety: never exceed pre-allocated scratch buffers
     if (numFrames > kMaxFrames) numFrames = kMaxFrames;
 
-    // ── Read stereo input (non-blocking, 0 ns timeout) ─────────────────────
     if (inputStream_) {
-        // inputInterleaved_ is sized kMaxFrames * kInputChannels — safe
         auto readResult = inputStream_->read(
             inputInterleaved_, numFrames, /*timeoutNanoseconds=*/0);
-
         if (readResult && readResult.value() > 0) {
-            const int framesRead = readResult.value();
-            // De-interleave LRLRLR… → separate L and R buffers
-            for (int i = 0; i < framesRead; ++i) {
+            const int n = readResult.value();
+            for (int i = 0; i < n; ++i) {
                 inputBufL_[i] = inputInterleaved_[i * kInputChannels + 0];
                 inputBufR_[i] = inputInterleaved_[i * kInputChannels + 1];
             }
-            // Zero any unread frames (underrun safety)
-            if (framesRead < numFrames) {
-                std::fill(inputBufL_ + framesRead, inputBufL_ + numFrames, 0.0f);
-                std::fill(inputBufR_ + framesRead, inputBufR_ + numFrames, 0.0f);
+            if (n < numFrames) {
+                std::fill(inputBufL_ + n, inputBufL_ + numFrames, 0.0f);
+                std::fill(inputBufR_ + n, inputBufR_ + numFrames, 0.0f);
             }
         } else {
-            // Underrun or error — pass silence to DSP
             std::fill(inputBufL_, inputBufL_ + numFrames, 0.0f);
             std::fill(inputBufR_, inputBufR_ + numFrames, 0.0f);
         }
@@ -136,10 +136,8 @@ oboe::DataCallbackResult AudioEngine::onAudioReady(oboe::AudioStream* /*stream*/
         std::fill(inputBufR_, inputBufR_ + numFrames, 0.0f);
     }
 
-    // ── DSP: stereo → 6-channel ────────────────────────────────────────────
     dspEngine_->processBlock(inputBufL_, inputBufR_, outputPtrs_, numFrames);
 
-    // ── Interleave 6 channels → Oboe output buffer ─────────────────────────
     float* out = reinterpret_cast<float*>(audioData);
     for (int i = 0; i < numFrames; ++i)
         for (int ch = 0; ch < kNumOutputChannels; ++ch)
@@ -149,7 +147,7 @@ oboe::DataCallbackResult AudioEngine::onAudioReady(oboe::AudioStream* /*stream*/
 }
 
 void AudioEngine::onErrorAfterClose(oboe::AudioStream* /*stream*/, oboe::Result error) {
-    LOGW("Stream error: %s — attempting restart", oboe::convertToText(error));
+    LOGW("Stream error: %s — restarting", oboe::convertToText(error));
     running_.store(false);
-    start(); // Oboe calls this on a non-audio thread — safe to restart here
+    start();
 }
