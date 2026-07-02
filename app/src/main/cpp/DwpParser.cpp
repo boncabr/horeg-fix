@@ -49,7 +49,7 @@
 // ── Frequency decode (1/24-octave index → Hz) ─────────────────────────────────
 static float freqFromIndex(uint16_t idx) {
     // f = 20 × 2^(idx/24), clamped to audio range
-    float hz = 20.0f * std::pow(2.0f, static_cast<float>(idx) / 24.0f);
+    float hz = 20.0f * ::powf(2.0f, static_cast<float>(idx) / 24.0f);
     return std::clamp(hz, 20.0f, 20000.0f);
 }
 
